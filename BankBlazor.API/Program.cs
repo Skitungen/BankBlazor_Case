@@ -1,4 +1,5 @@
 using BankBlazor.API.Data;
+using BankBlazor.API.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BankBlazor.API
@@ -17,6 +18,9 @@ namespace BankBlazor.API
             // DbContext
             builder.Services.AddDbContext<BankBlazorContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Services
+            builder.Services.AddScoped<IAccountService, AccountService>();
 
             // CORS
             builder.Services.AddCors(options =>
