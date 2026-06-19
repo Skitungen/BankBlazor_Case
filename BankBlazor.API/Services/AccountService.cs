@@ -42,5 +42,110 @@ namespace BankBlazor.API.Services
                 })
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<(bool Success, string Message, decimal? NewBalance)> DepositAsync(long accountId, decimal amount)
+        {
+            if (amount <= 0)
+                return (false, "Amount must be greater than zero", null);
+
+            var account = await _context.Accounts.FindAsync((int)accountId);
+
+            if (account == null)
+                return (false, $"Account {accountId} not found", null);
+
+            account.Balance += amount;
+
+            _context.Transactions.Add(new Transaction
+            {
+                AccountId = (int)accountId,
+                Date = DateOnly.FromDateTime(DateTime.Now),
+                Amount = amount,
+                Balance = account.Balance,
+                Type = "Credit",
+                Operation = "Deposit"
+            });
+
+            await _context.SaveChangesAsync();
+
+            return (true, "Deposit successful", account.Balance);
+        }
+
+        public async Task<(bool Success, string Message, decimal? NewBalance)> WithdrawAsync(long accountId, decimal amount)
+        {
+            if (amount <= 0)
+                return (false, "Amount must be greater than zero", null);
+
+            var account = await _context.Accounts.FindAsync((int)accountId);
+
+            if (account == null)
+                return (false, $"Account {accountId} not found", null);
+
+            if (account.Balance < amount)
+                return (false, "Insufficient funds", account.Balance);
+
+            account.Balance -= amount;
+
+            _context.Transactions.Add(new Transaction
+            {
+                AccountId = (int)accountId,
+                Date = DateOnly.FromDateTime(DateTime.Now),
+                Amount = -amount,
+                Balance = account.Balance,
+                Type = "Debit",
+                Operation = "Withdrawal"
+            });
+
+            await _context.SaveChangesAsync();
+
+            return (true, "Withdrawal successful", account.Balance);
+        }
+
+        public async Task<(bool Success, string Message, decimal? NewBalance)> TransferAsync(long fromAccountId, long toAccountId, decimal amount)
+        {
+            if (amount <= 0)
+                return (false, "Amount must be greater than zero", null);
+
+            if (fromAccountId == toAccountId)
+                return (false, "Cannot transfer to the same account", null);
+
+            var fromAccount = await _context.Accounts.FindAsync((int)fromAccountId);
+            var toAccount = await _context.Accounts.FindAsync((int)toAccountId);
+
+            if (fromAccount == null)
+                return (false, $"Account {fromAccountId} not found", null);
+
+            if (toAccount == null)
+                return (false, $"Account {toAccountId} not found", null);
+
+            if (fromAccount.Balance < amount)
+                return (false, "Insufficient funds", fromAccount.Balance);
+
+            fromAccount.Balance -= amount;
+            toAccount.Balance += amount;
+
+            _context.Transactions.Add(new Transaction
+            {
+                AccountId = (int)fromAccountId,
+                Date = DateOnly.FromDateTime(DateTime.Now),
+                Amount = -amount,
+                Balance = fromAccount.Balance,
+                Type = "Debit",
+                Operation = $"Transfer to account {toAccountId}"
+            });
+
+            _context.Transactions.Add(new Transaction
+            {
+                AccountId = (int)toAccountId,
+                Date = DateOnly.FromDateTime(DateTime.Now),
+                Amount = amount,
+                Balance = toAccount.Balance,
+                Type = "Credit",
+                Operation = $"Transfer from account {fromAccountId}"
+            });
+
+            await _context.SaveChangesAsync();
+
+            return (true, "Transfer successful", fromAccount.Balance);
+        }
     }
 }

@@ -38,5 +38,41 @@ namespace BankBlazor.API.Controllers
 
             return Ok(account);
         }
+
+        // POST: api/Account/deposit
+        [HttpPost("deposit")]
+        public async Task<ActionResult> Deposit(DepositWithdrawDto dto)
+        {
+            var result = await _accountService.DepositAsync(dto.AccountId, dto.Amount);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(new { message = result.Message, newBalance = result.NewBalance });
+        }
+
+        // POST: api/Account/withdraw
+        [HttpPost("withdraw")]
+        public async Task<ActionResult> Withdraw(DepositWithdrawDto dto)
+        {
+            var result = await _accountService.WithdrawAsync(dto.AccountId, dto.Amount);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(new { message = result.Message, newBalance = result.NewBalance });
+        }
+
+        // POST: api/Account/transfer
+        [HttpPost("transfer")]
+        public async Task<ActionResult> Transfer(TransferDto dto)
+        {
+            var result = await _accountService.TransferAsync(dto.FromAccountId, dto.ToAccountId, dto.Amount);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(new { message = result.Message, newBalance = result.NewBalance });
+        }
     }
 }
