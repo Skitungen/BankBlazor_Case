@@ -1,4 +1,9 @@
-﻿@page "/customer/{CustomerId:int}"
+﻿<h3>CustomerProfile</h3>
+
+@code {
+
+}
+@page "/customer/{CustomerId:int}"
 @using BankBlazor.Client.Models
 @using System.Net.Http.Json
 @inject HttpClient Http
@@ -44,8 +49,9 @@
                 <p><strong>Type:</strong> @account.AccountType</p>
                 <p><strong>Balance:</strong> @account.Balance.ToString("C")</p>
 
-                <Component />
-
+                <button @onclick="() => GoToTransactions(account.AccountId)">
+                    View Transactions
+                </button> View Transactions</button>
                 <button @onclick="() => SelectAccount(account.AccountId)">
                     Deposit / Withdraw / Transfer
                 </button>
