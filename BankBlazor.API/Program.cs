@@ -22,6 +22,7 @@ namespace BankBlazor.API
             // Services
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();
+            builder.Services.AddScoped<ITransactionService, TransactionService>();
 
             // CORS
             builder.Services.AddCors(options =>
